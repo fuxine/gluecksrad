@@ -2,530 +2,576 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FUXINE · GLÜCKSRAD</title>
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;
- background:transparent;
- color:#f9e6f1;
- font-family:Georgia,serif;
+* { box-sizing: border-box; }
+
+:root {
+  color-scheme: dark;
+  font-family: Georgia, serif;
 }
-.app{
- width:min(100%,680px);
- padding:12px;
- margin:0 auto;
+
+body {
+  margin: 0;
+  background: transparent;
+  color: #f9e6f1;
 }
-.panel{
- background:#1b1423;
- border:2px solid #b8739b;
- border-radius:22px;
- padding:18px;
- text-align:center;
- box-shadow:0 8px 30px #0009;
+
+.app {
+  width: min(100%, 680px);
+  margin: 0 auto;
+  padding: 8px;
 }
-h1{
- font:700 20px Arial,sans-serif;
- letter-spacing:2px;
- color:#f4a7d1;
- margin:0 0 15px;
+
+/* NUR DAS RAD IST IM KASTEN */
+.panel {
+  background: #1b1423;
+  border: 2px solid #b8739b;
+  border-radius: 22px;
+  padding: 16px 12px 14px;
+  text-align: center;
+  box-shadow: 0 8px 30px #0009;
 }
-.wheel-wrap{
- position:relative;
- width:100%;
- max-width:540px;
- aspect-ratio:1;
- margin:auto;
+
+h1 {
+  font: 700 20px Arial, sans-serif;
+  letter-spacing: 2px;
+  color: #f4a7d1;
+  margin: 0 0 10px;
 }
-canvas{
- width:100%;
- height:100%;
- display:block;
+
+.wheel-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  aspect-ratio: 1;
+  margin: auto;
 }
-.pointer{
- position:absolute;
- top:-3px;
- left:50%;
- transform:translateX(-50%);
- border-left:17px solid transparent;
- border-right:17px solid transparent;
- border-top:37px solid #f4d28e;
- filter:drop-shadow(0 2px 3px #000);
- z-index:2;
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-.result{
- font-size:23px;
- font-weight:bold;
- color:#f7dca6;
- margin:10px 0;
- text-shadow:0 2px 4px #000;
+
+.pointer {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 17px solid transparent;
+  border-right: 17px solid transparent;
+  border-top: 37px solid #f4d28e;
+  filter: drop-shadow(0 2px 3px #000);
+  z-index: 2;
 }
-.result:empty{display:none}
-button{
- background:#74466c;
- color:white;
- padding:10px 16px;
- border:1px solid #ad789d;
- border-radius:10px;
- cursor:pointer;
- font:15px Arial,sans-serif;
+
+.result {
+  color: #f7dca6;
+  font-size: 23px;
+  font-weight: bold;
+  margin: 8px 0 0;
+  text-shadow: 0 2px 4px #000;
 }
-button:disabled{opacity:.5}
-.controls{
- display:flex;
- justify-content:center;
- gap:8px;
- flex-wrap:wrap;
- margin:12px 0;
+
+.result:empty {
+  display: none;
 }
-details{
- margin-top:15px;
- text-align:left;
- font:14px Arial,sans-serif;
- border-top:1px solid #76506c;
- padding-top:12px;
+
+/* VERWALTUNG UNTERHALB DES KASTENS */
+.management {
+  margin-top: 16px;
+  padding: 18px;
+  background: #1b1423;
+  border: 1px solid #76506c;
+  border-radius: 16px;
+  font-family: Arial, sans-serif;
 }
-summary{
- cursor:pointer;
- color:#f2c7df;
- font-weight:bold;
+
+.management h2 {
+  margin: 0 0 14px;
+  font-size: 19px;
+  color: #f4a7d1;
 }
-textarea,input{
- width:100%;
- background:#100e17;
- color:white;
- border:1px solid #ad789d;
- border-radius:10px;
- padding:10px;
- margin-top:9px;
- font:15px Arial,sans-serif;
+
+.management label {
+  display: block;
+  margin: 15px 0 6px;
+  color: #f2c7df;
+  font-size: 14px;
+  font-weight: bold;
 }
-textarea{
- min-height:130px;
- resize:vertical;
+
+textarea, input {
+  display: block;
+  width: 100%;
+  background: #100e17;
+  color: white;
+  border: 1px solid #ad789d;
+  border-radius: 10px;
+  padding: 10px;
+  font: 15px Arial, sans-serif;
 }
-.hint,.status{
- font:12px/1.5 Arial,sans-serif;
- color:#c9b9cb;
- margin:9px 0;
+
+textarea {
+  min-height: 145px;
+  resize: vertical;
 }
-@media(max-width:480px){
- .app{padding:6px}
- .panel{padding:12px}
- h1{font-size:18px}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+button {
+  background: #74466c;
+  color: white;
+  padding: 10px 16px;
+  border: 1px solid #ad789d;
+  border-radius: 10px;
+  cursor: pointer;
+  font: 15px Arial, sans-serif;
+}
+
+button:hover {
+  background: #955982;
+}
+
+button:disabled {
+  opacity: .5;
+}
+
+.hint, .status {
+  font: 12px/1.5 Arial, sans-serif;
+  color: #c9b9cb;
+  margin: 9px 0;
+}
+
+@media (max-width: 480px) {
+  .app { padding: 6px; }
+  .panel { padding: 12px 8px; }
+  h1 { font-size: 18px; }
+  .management { padding: 14px; }
 }
 </style>
 </head>
 <body>
 
 <main class="app">
-<section class="panel">
 
-<h1>FUXINE · GLÜCKSRAD</h1>
+  <!-- OBS: DIESEN KASTEN ANZEIGEN -->
+  <section class="panel">
+    <h1>FUXINE · GLÜCKSRAD</h1>
 
-<div class="wheel-wrap">
- <div class="pointer"></div>
- <canvas id="wheel" width="1000" height="1000"></canvas>
-</div>
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="1000" height="1000"></canvas>
+    </div>
 
-<div id="result" class="result"></div>
+    <div id="result" class="result"></div>
+  </section>
 
-<details id="settings">
-<summary>⚙ Felder bearbeiten</summary>
+  <!-- OBS: DIESEN BEREICH UNTEN ABSCHNEIDEN -->
+  <section class="management">
+    <h2>⚙ Glücksrad verwalten</h2>
 
-<p class="hint">
-Ein Feld pro Zeile. Alle Felder haben die gleiche Gewinnchance.
-</p>
+    <label for="entries">Felder bearbeiten</label>
+    <p class="hint">
+      Ein Feld pro Zeile. Alle Felder haben dieselbe Gewinnchance.
+      Ein Feld kann mehrfach gewinnen.
+    </p>
 
-<textarea id="entries" spellcheck="false"></textarea>
+    <textarea id="entries" spellcheck="false"></textarea>
 
-<div class="controls">
- <button id="save">Felder speichern</button>
- <button id="spin">↻ Testdrehung</button>
-</div>
+    <div class="controls">
+      <button id="save">Felder speichern</button>
+      <button id="spin">↻ Testdrehung</button>
+    </div>
 
-<p class="hint">
-Twitch-Kanal:
-</p>
+    <label for="channel">Twitch-Kanal</label>
+    <input id="channel" value="fuxine" placeholder="fuxine">
 
-<input id="channel" value="fuxine">
+    <div class="controls">
+      <button id="connect">Twitch verbinden</button>
+    </div>
 
-<div class="controls">
- <button id="connect">Twitch verbinden</button>
-</div>
+    <div class="status" id="status">Nicht verbunden</div>
 
-<div class="status" id="status">
-Nicht verbunden
-</div>
+    <p class="hint">
+      Chatbefehl: <b>!drehen</b><br>
+      Nur der Broadcaster kann das Rad über den Chat starten.
+    </p>
+  </section>
 
-<p class="hint">
-Chatbefehl: !drehen<br>
-Nur der Broadcaster darf das Rad starten.
-</p>
-
-</details>
-
-</section>
 </main>
 
 <script>
-(()=>{
+(() => {
 "use strict";
 
-const $=id=>document.getElementById(id);
-const canvas=$("wheel");
-const ctx=canvas.getContext("2d");
+const $ = id => document.getElementById(id);
+const canvas = $("wheel");
+const ctx = canvas.getContext("2d");
 
-const defaults=[
- "Trinkpause",
- "Mini-Challenge",
- "Joker",
- "Chat entscheidet",
- "Noch einmal",
- "Überraschung"
+const defaults = [
+  "Trinkpause",
+  "Mini-Challenge",
+  "Joker",
+  "Chat entscheidet",
+  "Noch einmal",
+  "Überraschung"
 ];
 
-const palette=[
- "#8f4c79",
- "#3d365e",
- "#b87594",
- "#57426e",
- "#bd8b71",
- "#633653",
- "#765f89",
- "#a95c76"
+const palette = [
+  "#8f4c79",
+  "#3d365e",
+  "#b87594",
+  "#57426e",
+  "#bd8b71",
+  "#633653",
+  "#765f89",
+  "#a95c76"
 ];
 
-let items=[];
-let rotation=0;
-let spinning=false;
-let socket=null;
-let channel="fuxine";
-let reconnectTimer=null;
+const storageKey = "fuxine-wheel-v2";
 
-const storageKey="fuxine-wheel-v2";
+let items = [];
+let rotation = 0;
+let spinning = false;
+let socket = null;
+let channel = "fuxine";
+let reconnectTimer = null;
+let audioCtx = null;
 
-function load(){
- try{
-  const d=JSON.parse(
-   localStorage.getItem(storageKey)||"{}"
-  );
-  items=Array.isArray(d.items)&&d.items.length>=2
-   ?d.items:defaults.slice();
-  channel=d.channel||"fuxine";
- }catch{
-  items=defaults.slice();
- }
- $("entries").value=items.join("\n");
- $("channel").value=channel;
- draw();
-}
-
-function draw(){
- const w=1000;
- const c=500;
- const r=455;
- const n=items.length;
-
- ctx.clearRect(0,0,w,w);
- if(n<2)return;
-
- ctx.save();
- ctx.translate(c,c);
- ctx.rotate(rotation);
-
- const step=Math.PI*2/n;
-
- items.forEach((item,i)=>{
-  const start=-Math.PI/2-step/2+i*step;
-  const end=start+step;
-
-  ctx.beginPath();
-  ctx.moveTo(0,0);
-  ctx.arc(0,0,r,start,end);
-  ctx.closePath();
-  ctx.fillStyle=palette[i%palette.length];
-  ctx.fill();
-  ctx.strokeStyle="#f4c9db";
-  ctx.lineWidth=4;
-  ctx.stroke();
-
-  ctx.save();
-  ctx.rotate(start+step/2);
-  ctx.translate(r*.59,0);
-
-  ctx.fillStyle="#fff4ed";
-  ctx.shadowColor="#180b20";
-  ctx.shadowBlur=5;
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-
-  const font=Math.min(33,Math.max(15,520/n));
-  ctx.font=`bold ${font}px Georgia`;
-
-  const text=item.length>24
-   ?item.slice(0,23)+"…":item;
-
-  ctx.fillText(text,0,0,Math.max(70,r*.68));
-  ctx.restore();
- });
-
- ctx.beginPath();
- ctx.arc(0,0,62,0,Math.PI*2);
- ctx.fillStyle="#f1d39a";
- ctx.fill();
- ctx.strokeStyle="#462940";
- ctx.lineWidth=10;
- ctx.stroke();
-
- ctx.fillStyle="#4e2a47";
- ctx.font="bold 48px Georgia";
- ctx.textAlign="center";
- ctx.textBaseline="middle";
- ctx.fillText("✦",0,3);
-
- ctx.restore();
-}
-
-function save(){
- if(spinning)return;
-
- const values=$("entries").value
-  .split(/\r?\n/)
-  .map(x=>x.trim())
-  .filter(Boolean);
-
- if(values.length<2){
-  alert("Bitte mindestens zwei Felder eingeben.");
-  return;
- }
-
- items=values.slice(0,100);
- channel=$("channel").value
-  .trim()
-  .replace(/^@/,"")
-  .toLowerCase()||"fuxine";
-
- localStorage.setItem(storageKey,JSON.stringify({
-  items,channel
- }));
-
- rotation=0;
- $("result").textContent="";
- draw();
- $("status").textContent="Felder gespeichert";
-}
-
-let audioCtx=null;
-
-function audio(){
- try{
-  audioCtx ||=new (
-   window.AudioContext||
-   window.webkitAudioContext
-  )();
-
-  if(audioCtx.state==="suspended"){
-   audioCtx.resume().catch(()=>{});
-  }
-  return audioCtx;
- }catch{
-  return null;
- }
-}
-
-function tone(freq,duration,volume=.07,type="sine",delay=0){
- const a=audio();
- if(!a)return;
-
- const t=a.currentTime+delay;
- const o=a.createOscillator();
- const g=a.createGain();
-
- o.type=type;
- o.frequency.setValueAtTime(freq,t);
- g.gain.setValueAtTime(.0001,t);
- g.gain.exponentialRampToValueAtTime(
-  volume,t+.008
- );
- g.gain.exponentialRampToValueAtTime(
-  .0001,t+duration
- );
-
- o.connect(g).connect(a.destination);
- o.start(t);
- o.stop(t+duration+.01);
-}
-
-function tick(){
- tone(620,.035,.045,"triangle");
-}
-
-function fanfare(){
- tone(523.25,.19,.09,"sine");
- tone(659.25,.19,.09,"sine",.16);
- tone(783.99,.19,.09,"sine",.32);
- tone(1046.5,.48,.11,"sine",.48);
-}
-
-function spin(){
- if(spinning||items.length<2)return;
-
- spinning=true;
- audio();
-
- $("spin").disabled=true;
- $("result").textContent="Das Schicksal entscheidet …";
-
- const n=items.length;
- const idx=Math.floor(Math.random()*n);
- const step=Math.PI*2/n;
-
- const mod=x=>
-  ((x%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
-
- const current=mod(rotation);
- const target=mod(-idx*step);
- const delta=mod(target-current);
-
- const from=rotation;
- const to=rotation+
-  Math.PI*2*(6+Math.floor(Math.random()*3))+
-  delta;
-
- const duration=6500;
- const start=performance.now();
- let lastTick=-1;
-
- function frame(now){
-  const t=Math.min(1,(now-start)/duration);
-  const ease=1-Math.pow(1-t,4);
-
-  rotation=from+(to-from)*ease;
-
-  const tickIndex=Math.floor(
-   (rotation-from)/step
-  );
-
-  if(tickIndex!==lastTick){
-   if(lastTick>=0)tick();
-   lastTick=tickIndex;
-  }
-
-  draw();
-
-  if(t<1){
-   requestAnimationFrame(frame);
-  }else{
-   rotation=mod(to);
-   draw();
-
-   $("result").textContent=
-    "✦ "+items[idx]+" ✦";
-
-   fanfare();
-   spinning=false;
-   $("spin").disabled=false;
-  }
- }
-
- requestAnimationFrame(frame);
-}
-
-function connect(){
- channel=$("channel").value
-  .trim()
-  .replace(/^@/,"")
-  .toLowerCase()||"fuxine";
-
- if(reconnectTimer){
-  clearTimeout(reconnectTimer);
-  reconnectTimer=null;
- }
-
- if(socket){
-  socket.onclose=null;
-  socket.close();
- }
-
- $("status").textContent="Verbinde mit Twitch …";
-
- try{
-  socket=new WebSocket(
-   "wss://irc-ws.chat.twitch.tv:443"
-  );
-
-  socket.onopen=()=>{
-   socket.send("CAP REQ :twitch.tv/tags");
-   socket.send("PASS SCHMOOPIIE");
-   socket.send(
-    "NICK justinfan"+
-    Math.floor(Math.random()*90000+10000)
-   );
-   socket.send("JOIN #"+channel);
-
-   $("status").textContent=
-    "Twitch-Chat verbunden: #"+channel;
-  };
-
-  socket.onmessage=e=>{
-   for(const line of e.data.split("\r\n")){
-    if(line.startsWith("PING")){
-     socket.send("PONG :tmi.twitch.tv");
-     continue;
-    }
-
-    const match=line.match(
-     /^(?:@([^ ]+) )?:([^! ]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)$/
+function load() {
+  try {
+    const data = JSON.parse(
+      localStorage.getItem(storageKey) || "{}"
     );
 
-    if(!match)continue;
+    items = Array.isArray(data.items) && data.items.length >= 2
+      ? data.items
+      : defaults.slice();
 
-    const tags=match[1]||"";
-    const user=match[2].toLowerCase();
-    const message=match[3].trim().toLowerCase();
+    channel = data.channel || "fuxine";
+  } catch {
+    items = defaults.slice();
+  }
 
-    const broadcaster=
-     user===channel||
-     tags.includes("badges=broadcaster/1");
-
-    if(broadcaster&&message==="!drehen"){
-     spin();
-    }
-   }
-  };
-
-  socket.onerror=()=>{
-   $("status").textContent=
-    "Twitch-Verbindungsfehler";
-  };
-
-  socket.onclose=()=>{
-   $("status").textContent=
-    "Verbindung getrennt – neuer Versuch …";
-
-   reconnectTimer=setTimeout(connect,5000);
-  };
-
- }catch{
-  $("status").textContent=
-   "Verbindung nicht möglich";
- }
+  $("entries").value = items.join("\n");
+  $("channel").value = channel;
+  draw();
 }
 
-$("spin").onclick=spin;
-$("save").onclick=save;
+function draw() {
+  const w = 1000;
+  const c = 500;
+  const r = 455;
+  const n = items.length;
 
-$("connect").onclick=()=>{
- save();
- connect();
+  ctx.clearRect(0, 0, w, w);
+
+  if (n < 2) return;
+
+  ctx.save();
+  ctx.translate(c, c);
+  ctx.rotate(rotation);
+
+  const step = Math.PI * 2 / n;
+
+  items.forEach((item, i) => {
+    const start = -Math.PI / 2 - step / 2 + i * step;
+    const end = start + step;
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, r, start, end);
+    ctx.closePath();
+
+    ctx.fillStyle = palette[i % palette.length];
+    ctx.fill();
+
+    ctx.strokeStyle = "#f4c9db";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Beschriftung um 90 Grad gedreht
+    ctx.save();
+    const angle = start + step / 2;
+
+    ctx.rotate(angle);
+    ctx.translate(r * .59, 0);
+    ctx.rotate(Math.PI / 2);
+
+    ctx.fillStyle = "#fff4ed";
+    ctx.shadowColor = "#180b20";
+    ctx.shadowBlur = 5;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const font = Math.min(33, Math.max(15, 520 / n));
+    ctx.font = `bold ${font}px Georgia`;
+
+    const label = item.length > 24
+      ? item.slice(0, 23) + "…"
+      : item;
+
+    ctx.fillText(label, 0, 0, Math.max(70, r * .68));
+    ctx.restore();
+  });
+
+  ctx.beginPath();
+  ctx.arc(0, 0, 62, 0, Math.PI * 2);
+  ctx.fillStyle = "#f1d39a";
+  ctx.fill();
+
+  ctx.strokeStyle = "#462940";
+  ctx.lineWidth = 10;
+  ctx.stroke();
+
+  ctx.fillStyle = "#4e2a47";
+  ctx.font = "bold 48px Georgia";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("✦", 0, 3);
+
+  ctx.restore();
+}
+
+function save() {
+  if (spinning) return false;
+
+  const values = $("entries").value
+    .split(/\r?\n/)
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  if (values.length < 2) {
+    alert("Bitte mindestens zwei Felder eingeben.");
+    return false;
+  }
+
+  items = values.slice(0, 100);
+
+  channel = $("channel").value
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase() || "fuxine";
+
+  localStorage.setItem(
+    storageKey,
+    JSON.stringify({ items, channel })
+  );
+
+  rotation = 0;
+  $("result").textContent = "";
+  draw();
+
+  $("status").textContent = "Felder gespeichert";
+  return true;
+}
+
+function audio() {
+  try {
+    audioCtx ||= new (
+      window.AudioContext || window.webkitAudioContext
+    )();
+
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+
+    return audioCtx;
+  } catch {
+    return null;
+  }
+}
+
+function tone(freq, duration, volume = .07, type = "sine", delay = 0) {
+  const a = audio();
+  if (!a) return;
+
+  const t = a.currentTime + delay;
+  const oscillator = a.createOscillator();
+  const gain = a.createGain();
+
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(freq, t);
+
+  gain.gain.setValueAtTime(.0001, t);
+  gain.gain.exponentialRampToValueAtTime(volume, t + .008);
+  gain.gain.exponentialRampToValueAtTime(.0001, t + duration);
+
+  oscillator.connect(gain).connect(a.destination);
+  oscillator.start(t);
+  oscillator.stop(t + duration + .01);
+}
+
+function tick() {
+  tone(620, .035, .045, "triangle");
+}
+
+function fanfare() {
+  tone(523.25, .19, .09, "sine");
+  tone(659.25, .19, .09, "sine", .16);
+  tone(783.99, .19, .09, "sine", .32);
+  tone(1046.5, .48, .11, "sine", .48);
+}
+
+function spin() {
+  if (spinning || items.length < 2) return;
+
+  spinning = true;
+  audio();
+
+  $("spin").disabled = true;
+  $("result").textContent = "";
+
+  const n = items.length;
+  const idx = Math.floor(Math.random() * n);
+  const step = Math.PI * 2 / n;
+
+  const mod = x =>
+    ((x % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
+  const current = mod(rotation);
+  const target = mod(-idx * step);
+  const delta = mod(target - current);
+
+  const from = rotation;
+  const to = rotation
+    + Math.PI * 2 * (6 + Math.floor(Math.random() * 3))
+    + delta;
+
+  const duration = 6500;
+  const start = performance.now();
+  let lastTick = -1;
+
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const ease = 1 - Math.pow(1 - t, 4);
+
+    rotation = from + (to - from) * ease;
+
+    const tickIndex = Math.floor((rotation - from) / step);
+
+    if (tickIndex !== lastTick) {
+      if (lastTick >= 0) tick();
+      lastTick = tickIndex;
+    }
+
+    draw();
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      rotation = mod(to);
+      draw();
+
+      $("result").textContent = "✦ " + items[idx] + " ✦";
+      fanfare();
+
+      spinning = false;
+      $("spin").disabled = false;
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+function connect() {
+  channel = $("channel").value
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase() || "fuxine";
+
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  if (socket) {
+    socket.onclose = null;
+    socket.close();
+  }
+
+  $("status").textContent = "Verbinde mit Twitch …";
+
+  try {
+    socket = new WebSocket(
+      "wss://irc-ws.chat.twitch.tv:443"
+    );
+
+    socket.onopen = () => {
+      socket.send("CAP REQ :twitch.tv/tags");
+      socket.send("PASS SCHMOOPIIE");
+      socket.send(
+        "NICK justinfan" +
+        Math.floor(Math.random() * 90000 + 10000)
+      );
+      socket.send("JOIN #" + channel);
+
+      $("status").textContent =
+        "Twitch-Chat verbunden: #" + channel;
+    };
+
+    socket.onmessage = event => {
+      for (const line of event.data.split("\r\n")) {
+        if (line.startsWith("PING")) {
+          socket.send("PONG :tmi.twitch.tv");
+          continue;
+        }
+
+        const match = line.match(
+          /^(?:@([^ ]+) )?:([^! ]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)$/
+        );
+
+        if (!match) continue;
+
+        const tags = match[1] || "";
+        const user = match[2].toLowerCase();
+        const message = match[3].trim().toLowerCase();
+
+        const broadcaster =
+          user === channel ||
+          tags.includes("badges=broadcaster/1");
+
+        if (broadcaster && message === "!drehen") {
+          spin();
+        }
+      }
+    };
+
+    socket.onerror = () => {
+      $("status").textContent = "Twitch-Verbindungsfehler";
+    };
+
+    socket.onclose = () => {
+      $("status").textContent =
+        "Verbindung getrennt – neuer Versuch …";
+
+      reconnectTimer = setTimeout(connect, 5000);
+    };
+  } catch {
+    $("status").textContent = "Verbindung nicht möglich";
+  }
+}
+
+$("spin").onclick = spin;
+$("save").onclick = save;
+
+$("connect").onclick = () => {
+  if (save()) connect();
 };
 
 load();
 connect();
-
 })();
 </script>
 </body>
