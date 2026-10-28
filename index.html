@@ -25,7 +25,6 @@ body {
   padding: 8px;
 }
 
-/* NUR DAS RAD IST IM KASTEN */
 .panel {
   background: #1b1423;
   border: 2px solid #b8739b;
@@ -82,7 +81,6 @@ canvas {
   display: none;
 }
 
-/* VERWALTUNG UNTERHALB DES KASTENS */
 .management {
   margin-top: 16px;
   padding: 18px;
@@ -165,7 +163,7 @@ button:disabled {
 
 <main class="app">
 
-  <!-- OBS: DIESEN KASTEN ANZEIGEN -->
+  <!-- NUR DAS GLÜCKSRAD IM RAHMEN -->
   <section class="panel">
     <h1>FUXINE · GLÜCKSRAD</h1>
 
@@ -177,7 +175,7 @@ button:disabled {
     <div id="result" class="result"></div>
   </section>
 
-  <!-- OBS: DIESEN BEREICH UNTEN ABSCHNEIDEN -->
+  <!-- VERWALTUNG UNTERHALB DES RAHMENS -->
   <section class="management">
     <h2>⚙ Glücksrad verwalten</h2>
 
@@ -301,13 +299,12 @@ function draw() {
     ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Beschriftung um 90 Grad gedreht
+    // RADIALE BESCHRIFTUNG
     ctx.save();
-    const angle = start + step / 2;
 
+    const angle = start + step / 2;
     ctx.rotate(angle);
     ctx.translate(r * .59, 0);
-    ctx.rotate(Math.PI / 2);
 
     ctx.fillStyle = "#fff4ed";
     ctx.shadowColor = "#180b20";
