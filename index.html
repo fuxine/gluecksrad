@@ -1,17 +1,267 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fuxine · Glücksrad</title><style>
-:root{color-scheme:dark;font-family:Georgia,serif}*{box-sizing:border-box}body{margin:0;background:transparent;color:#f9e6f1}.app{width:min(100%,680px);margin:auto;padding:20px}.panel{background:#1b1423f5;border:2px solid #b8739b;border-radius:22px;box-shadow:0 8px 30px #0009;padding:18px;text-align:center}h1{font-family:Arial,sans-serif;font-size:20px;margin:0;color:#f4a7d1;letter-spacing:2px;font-weight:700}.sub{color:#cbb3ce;font:14px system-ui;margin-bottom:16px}.wheel-wrap{position:relative;max-width:540px;margin:auto;aspect-ratio:1}.wheel-wrap canvas{width:100%;height:100%;display:block;filter:drop-shadow(0 8px 12px #0009)}.pointer{position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-top:37px solid #f4d28e;filter:drop-shadow(0 2px 3px #000);z-index:2}.result{min-height:34px;margin:10px 0;font-size:23px;color:#f7dca6;font-weight:bold}.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}button,input,textarea{font:15px system-ui;border-radius:10px;border:1px solid #ad789d}button{background:#74466c;color:white;padding:10px 16px;cursor:pointer}button:hover{background:#955982}button:disabled{opacity:.45}details{margin-top:14px;text-align:left;font:14px system-ui}summary{cursor:pointer;color:#f2c7df}textarea{width:100%;min-height:125px;margin-top:9px;padding:10px;background:#100e17;color:white;resize:vertical}input{background:#100e17;color:white;padding:9px;width:100%;margin-top:7px}.hint{font:12px/1.5 system-ui;color:#c9b9cb;margin:8px 0}.status{font:12px system-ui;color:#cbb3ce;margin-top:8px}.overlay .edit-only{display:none}.overlay .panel{background:#1b1423f5}.overlay .app{padding:24px}.overlay h1{font-size:27px}@media(max-width:480px){.app{padding:10px}.panel{padding:12px}h1{font-size:24px}}
-.overlay .app{width:min(100%,680px);margin:0;padding:8px}.overlay .panel{padding:8px;background:transparent;border:0;border-radius:0;box-shadow:none}.overlay .wheel-wrap{width:540px;max-width:100%;margin:8px auto 0}.overlay .result{font-size:23px;min-height:0;margin:8px 0 0;text-shadow:0 2px 4px #000}.result:empty{display:none}.overlay h1{font-size:17px;margin:0 0 10px;text-shadow:0 2px 5px #000}</style></head><body><main class="app"><section class="panel"><h1>FUXINE · GLÜCKSRAD</h1><div class="wheel-wrap"><div class="pointer"></div><canvas id="wheel" width="1000" height="1000"></canvas></div><div id="result" class="result"></div><div class="controls edit-only"><button id="spin">↻ Drehen (Test)</button><button id="save">Felder speichern</button></div><details class="edit-only" open><summary>Felder bearbeiten</summary><p class="hint">Ein Feld pro Zeile. Alle Felder haben dieselbe Gewinnchance. Die Einstellungen werden in diesem Browser gespeichert.</p><textarea id="entries" spellcheck="false"></textarea><p class="hint">Twitch-Kanal (ohne @). Nur Nachrichten vom Broadcaster mit <b>!drehen</b> starten das Rad.</p><input id="channel" placeholder="fuxine" value="fuxine"><button id="connect" style="margin-top:8px">Twitch verbinden</button><div class="status" id="status">Nicht verbunden</div></details></section></main><script>
-(()=>{'use strict';const params=new URLSearchParams(location.search),overlay=params.get('overlay')==='1';if(overlay)document.body.classList.add('overlay');const $=id=>document.getElementById(id),canvas=$('wheel'),ctx=canvas.getContext('2d');let items=[],rotation=0,spinning=false,socket=null,channel='';const defaults=['Trinkpause','Mini-Challenge','Joker','Chat entscheidet','Noch einmal','Überraschung'];const palette=['#8f4c79','#3d365e','#b87594','#57426e','#bd8b71','#633653','#765f89','#a95c76'];const storageKey='fuxine-wheel-v1';
-function load(){try{const d=JSON.parse(localStorage.getItem(storageKey)||'{}');items=Array.isArray(d.items)&&d.items.length?d.items:defaults;channel=(d.channel||'fuxine').toLowerCase()}catch{items=defaults;channel='fuxine'}$('entries').value=items.join('\n');$('channel').value=channel;draw()}
-function draw(){const w=1000,c=w/2,r=455;ctx.clearRect(0,0,w,w);ctx.save();ctx.translate(c,c);ctx.rotate(rotation);const n=items.length;if(!n){ctx.restore();return}const step=Math.PI*2/n;items.forEach((item,i)=>{const start=-Math.PI/2-step/2+i*step,end=start+step;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,start,end);ctx.closePath();ctx.fillStyle=palette[i%palette.length];ctx.fill();ctx.strokeStyle='#f4c9db';ctx.lineWidth=4;ctx.stroke();ctx.save();ctx.rotate(start+step/2);ctx.translate(r*.59,0);ctx.rotate(Math.PI/2);ctx.fillStyle='#fff4ed';ctx.shadowColor='#180b20';ctx.shadowBlur=5;ctx.textAlign='center';ctx.textBaseline='middle';const font=Math.min(33,Math.max(15,520/n));ctx.font=`bold ${font}px Georgia`;let t=item.length>24?item.slice(0,23)+'…':item;ctx.fillText(t,0,0,Math.max(70,r*.68));ctx.restore()});ctx.beginPath();ctx.arc(0,0,62,0,Math.PI*2);ctx.fillStyle='#f1d39a';ctx.fill();ctx.strokeStyle='#462940';ctx.lineWidth=10;ctx.stroke();ctx.fillStyle='#4e2a47';ctx.font='bold 48px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✦',0,3);ctx.restore()}
-function save(){const v=$('entries').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(v.length<2){alert('Bitte mindestens zwei Felder eintragen.');return}items=v.slice(0,100);channel=$('channel').value.trim().replace(/^@/,'').toLowerCase()||'fuxine';localStorage.setItem(storageKey,JSON.stringify({items,channel}));rotation=0;$('result').textContent='';draw();$('status').textContent='Gespeichert. Hinweis: OBS hat einen eigenen Browser-Speicher.'}
-// Sounds werden direkt mit Web Audio erzeugt, ohne externe Dateien.
+
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fuxine · Glücksrad</title>
+<style>
+:root{color-scheme:dark;font-family:Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;background:transparent;color:#f9e6f1}
+.app{width:min(100%,680px);margin:auto;padding:20px}
+.panel{background:#1b1423f5;border:2px solid #b8739b;border-radius:22px;box-shadow:0 8px 30px #0009;padding:18px;text-align:center}
+h1{font-family:Arial,sans-serif;font-size:20px;margin:0;color:#f4a7d1;letter-spacing:2px;font-weight:700}
+.wheel-wrap{position:relative;max-width:540px;margin:auto;aspect-ratio:1}
+.wheel-wrap canvas{width:100%;height:100%;display:block;filter:drop-shadow(0 8px 12px #0009)}
+.pointer{position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-top:37px solid #f4d28e;filter:drop-shadow(0 2px 3px #000);z-index:2}
+.result{min-height:34px;margin:10px 0;font-size:23px;color:#f7dca6;font-weight:bold}
+.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+button,input,textarea{font:15px system-ui;border-radius:10px;border:1px solid #ad789d}
+button{background:#74466c;color:white;padding:10px 16px;cursor:pointer}
+button:hover{background:#955982}
+button:disabled{opacity:.45}
+details{margin-top:14px;text-align:left;font:14px system-ui}
+summary{cursor:pointer;color:#f2c7df}
+textarea{width:100%;min-height:125px;margin-top:9px;padding:10px;background:#100e17;color:white;resize:vertical}
+input{background:#100e17;color:white;padding:9px;width:100%;margin-top:7px}
+.hint{font:12px/1.5 system-ui;color:#c9b9cb;margin:8px 0}
+.status{font:12px system-ui;color:#cbb3ce;margin-top:8px}
+.overlay .edit-only{display:none}
+.overlay .app{width:min(100%,680px);margin:0;padding:8px}
+.overlay .panel{padding:8px;background:transparent;border:0;border-radius:0;box-shadow:none}
+.overlay .wheel-wrap{width:540px;max-width:100%;margin:8px auto 0}
+.overlay .result{font-size:23px;min-height:0;margin:8px 0 0;text-shadow:0 2px 4px #000}
+.result:empty{display:none}
+.overlay h1{font-size:17px;margin:0 0 10px;text-shadow:0 2px 5px #000}
+@media(max-width:480px){
+.app{padding:10px}
+.panel{padding:12px}
+h1{font-size:24px}
+}
+</style>
+</head>
+<body>
+<main class="app">
+<section class="panel">
+<h1>FUXINE · GLÜCKSRAD</h1>
+<div class="wheel-wrap">
+<div class="pointer"></div>
+<canvas id="wheel" width="1000" height="1000"></canvas>
+</div>
+<div id="result" class="result"></div>
+<div class="controls edit-only">
+<button id="spin">↻ Drehen (Test)</button>
+<button id="save">Felder speichern</button>
+</div>
+<details class="edit-only" open>
+<summary>Felder bearbeiten</summary>
+<p class="hint">Ein Feld pro Zeile. Alle Felder haben dieselbe Gewinnchance. Die Einstellungen werden in diesem Browser gespeichert.</p>
+<textarea id="entries" spellcheck="false"></textarea>
+<p class="hint">Twitch-Kanal (ohne @). Nur Nachrichten vom Broadcaster mit <b>!drehen</b> starten das Rad.</p>
+<input id="channel" placeholder="fuxine" value="fuxine">
+<button id="connect" style="margin-top:8px">Twitch verbinden</button>
+<div class="status" id="status">Nicht verbunden</div>
+</details>
+</section>
+</main>
+<script>
+(()=>{
+'use strict';
+const params=new URLSearchParams(location.search);
+const overlay=params.get('overlay')==='1';
+if(overlay)document.body.classList.add('overlay');
+const $=id=>document.getElementById(id);
+const canvas=$('wheel'),ctx=canvas.getContext('2d');
+let items=[],rotation=0,spinning=false,socket=null,channel='';
+const defaults=['Trinkpause','Mini-Challenge','Joker','Chat entscheidet','Noch einmal','Überraschung'];
+const palette=['#8f4c79','#3d365e','#b87594','#57426e','#bd8b71','#633653','#765f89','#a95c76'];
+const storageKey='fuxine-wheel-v1';
+
+function load(){
+try{
+const d=JSON.parse(localStorage.getItem(storageKey)||'{}');
+items=Array.isArray(d.items)&&d.items.length?d.items:defaults;
+channel=(d.channel||'fuxine').toLowerCase();
+}catch{
+items=defaults;channel='fuxine';
+}
+$('entries').value=items.join('\n');
+$('channel').value=channel;
+draw();
+}
+
+function draw(){
+const w=1000,c=w/2,r=455;
+ctx.clearRect(0,0,w,w);
+ctx.save();
+ctx.translate(c,c);
+ctx.rotate(rotation);
+const n=items.length;
+if(!n){ctx.restore();return}
+const step=Math.PI*2/n;
+items.forEach((item,i)=>{
+const start=-Math.PI/2-step/2+i*step,end=start+step;
+ctx.beginPath();
+ctx.moveTo(0,0);
+ctx.arc(0,0,r,start,end);
+ctx.closePath();
+ctx.fillStyle=palette[i%palette.length];
+ctx.fill();
+ctx.strokeStyle='#f4c9db';
+ctx.lineWidth=4;
+ctx.stroke();
+ctx.save();
+ctx.rotate(start+step/2);
+ctx.translate(r*.59,0);
+ctx.fillStyle='#fff4ed';
+ctx.shadowColor='#180b20';
+ctx.shadowBlur=5;
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+const font=Math.min(33,Math.max(15,520/n));
+ctx.font=`bold ${font}px Georgia`;
+let t=item.length>24?item.slice(0,23)+'…':item;
+ctx.fillText(t,0,0,Math.max(70,r*.68));
+ctx.restore();
+});
+ctx.beginPath();
+ctx.arc(0,0,62,0,Math.PI*2);
+ctx.fillStyle='#f1d39a';
+ctx.fill();
+ctx.strokeStyle='#462940';
+ctx.lineWidth=10;
+ctx.stroke();
+ctx.fillStyle='#4e2a47';
+ctx.font='bold 48px Georgia';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+ctx.fillText('✦',0,3);
+ctx.restore();
+}
+
+function save(){
+const v=$('entries').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+if(v.length<2){alert('Bitte mindestens zwei Felder eintragen.');return}
+items=v.slice(0,100);
+channel=$('channel').value.trim().replace(/^@/,'').toLowerCase()||'fuxine';
+localStorage.setItem(storageKey,JSON.stringify({items,channel}));
+rotation=0;
+$('result').textContent='';
+draw();
+$('status').textContent='Gespeichert. Hinweis: OBS hat einen eigenen Browser-Speicher.';
+}
+
 let audioCtx=null;
-function audio(){try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});return audioCtx}catch{return null}}
-function tone(freq,duration,volume=0.07,type='sine',delay=0){const a=audio();if(!a)return;const t=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+duration);o.connect(g).connect(a.destination);o.start(t);o.stop(t+duration+0.01)}
+function audio(){
+try{
+audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
+if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+return audioCtx;
+}catch{return null}
+}
+function tone(freq,duration,volume=0.07,type='sine',delay=0){
+const a=audio();if(!a)return;
+const t=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();
+o.type=type;
+o.frequency.setValueAtTime(freq,t);
+g.gain.setValueAtTime(0.0001,t);
+g.gain.exponentialRampToValueAtTime(volume,t+0.008);
+g.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+o.connect(g).connect(a.destination);
+o.start(t);
+o.stop(t+duration+0.01);
+}
 function tick(){tone(620,0.035,0.045,'triangle')}
-function fanfare(){tone(523.25,0.19,0.09,'sine');tone(659.25,0.19,0.09,'sine',0.16);tone(783.99,0.19,0.09,'sine',0.32);tone(1046.5,0.48,0.11,'sine',0.48)}
-function spin(){if(spinning||items.length<2)return;spinning=true;audio();$('spin').disabled=true;$('result').textContent='Das Schicksal entscheidet …';const n=items.length,idx=Math.floor(Math.random()*n),step=Math.PI*2/n,mod=x=>((x%(2*Math.PI))+2*Math.PI)%(2*Math.PI);const current=mod(rotation),target=mod(-idx*step),delta=mod(target-current),from=rotation,to=rotation+Math.PI*2*(6+Math.floor(Math.random()*3))+delta,duration=6500,start=performance.now();let lastTick=-1;function frame(now){const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,4);rotation=from+(to-from)*ease;const tickIndex=Math.floor((rotation-from)/(Math.PI*2/n));if(tickIndex!==lastTick){if(lastTick>=0)tick();lastTick=tickIndex}draw();if(t<1)requestAnimationFrame(frame);else{rotation=mod(to);draw();$('result').textContent='✦ '+items[idx]+' ✦';fanfare();spinning=false;$('spin').disabled=false}}requestAnimationFrame(frame)}
-function connect(){channel=$('channel').value.trim().replace(/^@/,'').toLowerCase()||'fuxine';if(socket){socket.onclose=null;socket.close()}$('status').textContent='Verbinde mit Twitch …';try{socket=new WebSocket('wss://irc-ws.chat.twitch.tv:443');socket.onopen=()=>{socket.send('CAP REQ :twitch.tv/tags');socket.send('PASS SCHMOOPIIE');socket.send('NICK justinfan'+Math.floor(Math.random()*90000+10000));socket.send('JOIN #'+channel);$('status').textContent='Twitch-Chat verbunden: #'+channel};socket.onmessage=e=>{for(const line of e.data.split('\r\n')){if(line.startsWith('PING')){socket.send('PONG :tmi.twitch.tv');continue}const match=line.match(/^(?:@([^ ]+) )?:([^! ]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)$/);if(!match)continue;const tags=match[1]||'',user=match[2].toLowerCase(),message=match[3].trim().toLowerCase();const broadcaster=user===channel||tags.includes('badges=broadcaster/1');if(broadcaster&&message==='!drehen')spin()}};socket.onerror=()=>$('status').textContent='Twitch-Verbindung fehlgeschlagen';socket.onclose=()=>{$('status').textContent='Verbindung getrennt – erneuter Versuch in 5 Sekunden';setTimeout(connect,5000)}}catch(e){$('status').textContent='Verbindung nicht möglich'}}
-$('spin').onclick=spin;$('save').onclick=save;$('connect').onclick=()=>{save();connect()};load();connect();})();
-</script></body></html>
+function fanfare(){
+tone(523.25,0.19,0.09,'sine');
+tone(659.25,0.19,0.09,'sine',0.16);
+tone(783.99,0.19,0.09,'sine',0.32);
+tone(1046.5,0.48,0.11,'sine',0.48);
+}
+
+function spin(){
+if(spinning||items.length<2)return;
+spinning=true;
+audio();
+$('spin').disabled=true;
+$('result').textContent='Das Schicksal entscheidet …';
+const n=items.length,idx=Math.floor(Math.random()*n);
+const step=Math.PI*2/n;
+const mod=x=>((x%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+const current=mod(rotation),target=mod(-idx*step);
+const delta=mod(target-current);
+const from=rotation;
+const to=rotation+Math.PI*2*(6+Math.floor(Math.random()*3))+delta;
+const duration=6500,start=performance.now();
+let lastTick=-1;
+function frame(now){
+const t=Math.min(1,(now-start)/duration);
+const ease=1-Math.pow(1-t,4);
+rotation=from+(to-from)*ease;
+const tickIndex=Math.floor((rotation-from)/(Math.PI*2/n));
+if(tickIndex!==lastTick){
+if(lastTick>=0)tick();
+lastTick=tickIndex;
+}
+draw();
+if(t<1)requestAnimationFrame(frame);
+else{
+rotation=mod(to);
+draw();
+$('result').textContent='✦ '+items[idx]+' ✦';
+fanfare();
+spinning=false;
+$('spin').disabled=false;
+}
+}
+requestAnimationFrame(frame);
+}
+
+function connect(){
+channel=$('channel').value.trim().replace(/^@/,'').toLowerCase()||'fuxine';
+if(socket){socket.onclose=null;socket.close()}
+$('status').textContent='Verbinde mit Twitch …';
+try{
+socket=new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+socket.onopen=()=>{
+socket.send('CAP REQ :twitch.tv/tags');
+socket.send('PASS SCHMOOPIIE');
+socket.send('NICK justinfan'+Math.floor(Math.random()*90000+10000));
+socket.send('JOIN #'+channel);
+$('status').textContent='Twitch-Chat verbunden: #'+channel;
+};
+socket.onmessage=e=>{
+for(const line of e.data.split('\r\n')){
+if(line.startsWith('PING')){
+socket.send('PONG :tmi.twitch.tv');
+continue;
+}
+const match=line.match(/^(?:@([^ ]+) )?:([^! ]+)![^ ]+ PRIVMSG #[^ ]+ :(.+)$/);
+if(!match)continue;
+const tags=match[1]||'';
+const user=match[2].toLowerCase();
+const message=match[3].trim().toLowerCase();
+const broadcaster=user===channel||tags.includes('badges=broadcaster/1');
+if(broadcaster&&message==='!drehen')spin();
+}
+};
+socket.onerror=()=>$('status').textContent='Twitch-Verbindung fehlgeschlagen';
+socket.onclose=()=>{
+$('status').textContent='Verbindung getrennt – erneuter Versuch in 5 Sekunden';
+setTimeout(connect,5000);
+};
+}catch(e){
+$('status').textContent='Verbindung nicht möglich';
+}
+}
+
+$('spin').onclick=spin;
+$('save').onclick=save;
+$('connect').onclick=()=>{save();connect()};
+load();
+connect();
+})();
+</script>
+</body>
+</html>
