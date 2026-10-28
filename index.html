@@ -69,18 +69,6 @@ canvas {
   z-index: 2;
 }
 
-.result {
-  color: #f7dca6;
-  font-size: 23px;
-  font-weight: bold;
-  margin: 8px 0 0;
-  text-shadow: 0 2px 4px #000;
-}
-
-.result:empty {
-  display: none;
-}
-
 .management {
   margin-top: 16px;
   padding: 18px;
@@ -163,7 +151,7 @@ button:disabled {
 
 <main class="app">
 
-  <!-- NUR DAS GLÜCKSRAD IM RAHMEN -->
+  <!-- GLÜCKSRAD IM RAHMEN -->
   <section class="panel">
     <h1>FUXINE · GLÜCKSRAD</h1>
 
@@ -171,8 +159,6 @@ button:disabled {
       <div class="pointer"></div>
       <canvas id="wheel" width="1000" height="1000"></canvas>
     </div>
-
-    <div id="result" class="result"></div>
   </section>
 
   <!-- VERWALTUNG UNTERHALB DES RAHMENS -->
@@ -367,7 +353,6 @@ function save() {
   );
 
   rotation = 0;
-  $("result").textContent = "";
   draw();
 
   $("status").textContent = "Felder gespeichert";
@@ -426,9 +411,7 @@ function spin() {
 
   spinning = true;
   audio();
-
   $("spin").disabled = true;
-  $("result").textContent = "";
 
   const n = items.length;
   const idx = Math.floor(Math.random() * n);
@@ -470,8 +453,6 @@ function spin() {
     } else {
       rotation = mod(to);
       draw();
-
-      $("result").textContent = "✦ " + items[idx] + " ✦";
       fanfare();
 
       spinning = false;
